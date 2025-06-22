@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*;
 public class flights {
     @GetMapping("/flight")
     public String getData() {
-        return "Please return flight ticket with 30% discount"
+        return "Please return flight ticket with 30% discount";
     }
 
 }
