@@ -36,7 +36,7 @@ pipeline {
 			when {
 	            allOf {
 				expression { BRANCH_NAME ==~ /(feature\/dwh_bi_Rel_[0-9][0-9]_.*$|dwh_bi_Rel_[0-9][0-9]|bugfix\/dwh_bi_Rel_[0-9][0-9]_.*$)/ }
-				expression { BUILD_NUMBER != '1'}
+				expression { BUILD_NUMBER != '1' }
 				      }
 				}
            steps {
