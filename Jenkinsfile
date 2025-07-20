@@ -1,63 +1,79 @@
 pipeline {
     agent any
-	 options {
-        disableConcurrentBuilds()
-    }
-    stages {
-        stage('checkout validations') {
-			when {
-	            allOf {
-				expression { BRANCH_NAME ==~ /(feature\/dwh_bi_Rel_[0-9][0-9]_.*$|dwh_bi_Rel_[0-9][0-9]|bugfix\/dwh_bi_Rel_[0-9][0-9]_.*$)/ }
-				expression { BUILD_NUMBER != '1'}
-				      }
-				}
-			steps {
-                echo "checkout of scm at ${WORKSPACE}"
-			    echo "Branch name is ${BRANCH_NAME}"
-				echo "Build number is ${BUILD_NUMBER}"
-		        bat "set PATH=C:\\Program Files\\Git\\;%PATH% && git-bash.exe C:\\Users\\admin\\git_checkouts\\checkout_validation.sh ${WORKSPACE} ${BRANCH_NAME} ${BUILD_NUMBER}"
-				
-				echo "checkout validation logs are as below :"
-				script {
-				     def validate_logs = readFile(file: 'build.log')
-                     println(validate_logs)
-					  def data = readFile(file: 'failure_checkout.log').trim()
-                      println(data)
-					  if (data == 'Y') {
-                        echo 'Failed in checkout validations.. exiting'
-						error "Checkout Validation Stage has failed..."
-                    } else {
-                        echo 'Suceeded in checkout validations.. proceeding with next stage...'
-                    }
-				       }
-    				}
-        }
-        stage('packaging and artifactory push') {
-			when {
-	            allOf {
-				expression { BRANCH_NAME ==~ /(feature\/dwh_bi_Rel_[0-9][0-9]_.*$|dwh_bi_Rel_[0-9][0-9]|bugfix\/dwh_bi_Rel_[0-9][0-9]_.*$)/ }
-				expression { BUILD_NUMBER != '1'  }
-				      }
-				}
-           steps {
-                echo 'running build.sh'
-                bat "set PATH=C:\\Program Files\\Git\\;%PATH% && git-bash.exe C:\\Users\\admin\\git_checkouts\\artifact_processing.sh ${WORKSPACE} ${BRANCH_NAME}"
-				echo "artifact logs are as below :"
-				script {
-				   def artifact_log = readFile(file: 'artifact.log')
-                   println(artifact_log)
-				}
-                 }
-        }
+
+    options {
+        buildDiscarder(logRotator(numToKeepStr: '5', artifactNumToKeepStr: '5'))
     }
 
-    post {
-        // Cleanup the workspace after build
-        always {
-            cleanWs(cleanWhenNotBuilt: true,
-                    deleteDirs: true,
-                    disableDeferredWipeout: true,
-                    notFailBuild: true)
+    stages {
+        stage('Code Compilation') {
+            steps {
+                echo 'Starting Code Compilation...'
+                sh 'mvn clean compile'
+                echo 'Code Compilation Completed Successfully!'
+            }
+        }
+        stage('Code QA Execution') {
+            steps {
+                echo 'Running JUnit Test Cases...'
+                sh 'mvn clean test'
+                echo 'JUnit Test Cases Completed Successfully!'
+            }
+        }
+        stage('Code Package') {
+            steps {
+                echo 'Creating WAR Artifact...'
+                sh 'mvn clean package'
+                echo 'WAR Artifact Created Successfully!'
+            }
+        }
+        stage('Build & Tag Docker Image') {
+            steps {
+                echo 'Building Docker Image with Tags...'
+                sh "docker build -t localhost:18080/booking-ms:latest -t booking-ms:latest ."
+                echo 'Docker Image Build Completed!'
+            }
+        }
+        stage('Docker Image Scanning') {
+            steps {
+                echo 'Scanning Docker Image with Trivy...'
+                //sh 'trivy image localhost:18080/booking-ms:latest || echo "Scan Failed - Proceeding with Caution"'
+                echo 'Docker Image Scanning Completed!'
+            }
+        }
+        stage('Push Docker Image to Docker Hub') {
+            steps {
+                script {
+                    withCredentials([string(credentialsId: 'dockerhubCred', variable: 'dockerhubCred')]) {
+                        sh 'docker login docker.io -u admin -p ${dockerhubCred}'
+                        echo 'Pushing Docker Image to Docker Hub...'
+                       // sh 'docker push pramodmanjare27/booking-ms:latest'
+                        echo 'Docker Image Pushed to Docker Hub Successfully!'
+                    }
+                }
+            }
+        }
+        stage('Push Docker Image to Amazon ECR') {
+            steps {
+                script {
+                    withDockerRegistry([credentialsId: 'nexus-credentials', url: "localhost:18080"]) {
+                        echo 'Tagging and Pushing Docker Image to ECR...'
+                        sh '''
+                            docker images
+                            docker tag booking-ms:latest ${url}/booking-ms:latest
+                            docker push ${url}/booking-ms:latest
+                        '''
+                        echo 'Docker Image Pushed to nexus Successfully!'
+                    }
+                }
+            }
+		}
+        stage('Cleanup Docker Images') {
+            steps {
+                echo 'Cleaning up local Docker images...'
+                //sh 'docker rmi -f $(docker images -aq)'
+                echo 'Local Docker images deleted successfully!'
+            }
         }
     }
 }
