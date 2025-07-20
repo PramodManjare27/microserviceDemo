@@ -34,7 +34,7 @@ pipeline {
         stage('Build & Tag Docker Image') {
             steps {
                 echo 'Building Docker Image with Tags...'
-                sh "docker build -t ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest -t booking-ms:latest ."
+                sh "sudo docker build -t ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest -t booking-ms:latest ."
                 echo 'Docker Image Build Completed!'
             }
         }
@@ -49,7 +49,7 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'dockerhubCred', variable: 'dockerhubCred')]) {
-                        sh 'docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}'
+                        sh 'sudo docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}'
                         echo 'Pushing Docker Image to Docker Hub...'
                        // sh 'docker push pramodmanjare27/booking-ms:latest'
                         echo 'Docker Image Pushed to Docker Hub Successfully!'
@@ -63,9 +63,8 @@ pipeline {
                     withDockerRegistry([credentialsId: 'nexus-credentials', url: "localhost:18080"]) {
                         echo 'Tagging and Pushing Docker Image to ECR...'
                         sh '''
-                            docker images
-                            docker tag booking-ms:latest ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
-                            docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
+                            sudo docker images
+                            sudo docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
                         '''
                         echo 'Docker Image Pushed to nexus Successfully!'
                     }
