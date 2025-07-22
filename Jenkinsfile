@@ -62,7 +62,7 @@ pipeline {
         stage('Push Docker Image to Nexus') {
             steps {
                 script {
-                    withDockerRegistry([credentialsId: 'nexus-credentials', variable: "nexus-credentials"]) {
+                    withCredentials([string(credentialsId: 'nexus-credentials', variable: "nexus-credentials"]) {
                         echo 'Pushing Docker Image to nexus ...'
 			
                         sh '''
