@@ -52,7 +52,7 @@ pipeline {
                         echo 'Pushing Docker Image to Docker Hub...'
 			sh '''
                               sudo docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}
-                              docker push pramodmanjare27/booking-ms:latest
+                              sudo docker push pramodmanjare27/booking-ms:latest
 			    '''
                         echo 'Docker Image Pushed to Docker Hub Successfully!'
                     }
