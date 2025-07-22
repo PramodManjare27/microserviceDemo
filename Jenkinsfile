@@ -34,7 +34,7 @@ pipeline {
         stage('Build & Tag Docker Image') {
             steps {
                 echo 'Building Docker Image with Tags...'
-                sh "sudo docker build -t ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest -t booking-ms:latest ."
+                sh "sudo docker build -t ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest -t pramodmanjare27/booking-ms:latest ."
                 echo 'Docker Image Build Completed!'
             }
         }
