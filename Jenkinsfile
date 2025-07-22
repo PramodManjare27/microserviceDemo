@@ -66,9 +66,9 @@ pipeline {
                         echo 'Pushing Docker Image to nexus ...'
 			
                         sh '''
-                            sudo docker login ${NEXUS_HOST}:${NEXUS_PORT} -u admin -p ${nexus-credentials}
+                            #sudo docker login ${NEXUS_HOST}:${NEXUS_PORT} -u admin -p ${nexus-credentials}
 			    sudo docker images
-                            sudo docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
+                            #sudo docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
                         '''
                         echo 'Docker Image Pushed to nexus Successfully!'
                     }
