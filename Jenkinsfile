@@ -49,9 +49,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'dockerhubCred', variable: 'dockerhubCred')]) {
-                        sh 'sudo docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}'
                         echo 'Pushing Docker Image to Docker Hub...'
-                        sh 'docker push pramodmanjare27/booking-ms:latest'
+			sh '''
+                              sudo docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}
+                              docker push pramodmanjare27/booking-ms:latest
+			    '''
                         echo 'Docker Image Pushed to Docker Hub Successfully!'
                     }
                 }
@@ -62,9 +64,10 @@ pipeline {
                 script {
                     withDockerRegistry([credentialsId: 'nexus-credentials', variable: "nexus-credentials"]) {
                         echo 'Pushing Docker Image to nexus ...'
-			sh 'sudo docker login docker.io -u admin -p ${nexus-credentials}'
+			
                         sh '''
-                            sudo docker images
+                            sudo docker login ${NEXUS_HOST}:${NEXUS_PORT} -u admin -p ${nexus-credentials}
+			    sudo docker images
                             sudo docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
                         '''
                         echo 'Docker Image Pushed to nexus Successfully!'
