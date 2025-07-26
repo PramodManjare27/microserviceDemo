@@ -24,13 +24,6 @@ pipeline {
                 echo 'JUnit Test Cases Completed Successfully!'
             }
         }
-        stage('Code Package') {
-            steps {
-                echo 'Creating WAR Artifact...'
-                sh 'mvn clean package'
-                echo 'WAR Artifact Created Successfully!'
-            }
-        }
         stage('SonarQube Scan') {
         environment{
            scannerHome = tool 'sonarscanner'
@@ -45,6 +38,13 @@ pipeline {
                    waitForQualityGate abortPipeline: true
                 }
                 echo 'Sonar Scan Ran Successfully!'
+            }
+        }
+        stage('Code Package') {
+            steps {
+                echo 'Creating WAR Artifact...'
+                sh 'mvn clean package'
+                echo 'WAR Artifact Created Successfully!'
             }
         }
         stage('Build & Tag Docker Image') {
