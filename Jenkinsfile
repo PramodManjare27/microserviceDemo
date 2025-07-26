@@ -32,10 +32,17 @@ pipeline {
             }
         }
         stage('SonarQube Scan') {
+        environment{
+           scannerHome = tool 'sonarscanner'
+        }
             steps {
                 echo 'Running SonarScan...'
                 withSonarQubeEnv(installationName : 'sonarqube-dell') {
+                sh "${scannerHome}/bin/sonar-scanner"
                 sh 'mvn clean sonar:sonar'
+                }
+                timeout(time:10 , unit: 'MINUTES'){
+                   waitForQualityGate abortPipeline: true
                 }
                 echo 'Sonar Scan Ran Successfully!'
             }
