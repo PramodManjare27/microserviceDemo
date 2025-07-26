@@ -32,7 +32,7 @@ pipeline {
                 echo 'Running SonarScan...'
                 withSonarQubeEnv(installationName : 'sonarqube-dell') {
                 sh "${scannerHome}/bin/sonar-scanner"
-                sh 'mvn clean sonar:sonar'
+                //sh 'mvn clean sonar:sonar'
                 }
                 timeout(time:10 , unit: 'MINUTES'){
                    waitForQualityGate abortPipeline: true
