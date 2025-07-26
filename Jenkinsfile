@@ -31,6 +31,13 @@ pipeline {
                 echo 'WAR Artifact Created Successfully!'
             }
         }
+        stage('SonarQube Scan') {
+            steps {
+                echo 'Running SonarScan...'
+                sh 'mvn clean sonar:sonar'
+                echo 'Sonar Scan Ran Successfully!'
+            }
+        }
         stage('Build & Tag Docker Image') {
             steps {
                 echo 'Building Docker Image with Tags...'
