@@ -34,7 +34,9 @@ pipeline {
         stage('SonarQube Scan') {
             steps {
                 echo 'Running SonarScan...'
+                withSonarQubeEnv(installationName : 'sonarqube-dell') {
                 sh 'mvn clean sonar:sonar'
+                }
                 echo 'Sonar Scan Ran Successfully!'
             }
         }
