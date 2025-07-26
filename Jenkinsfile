@@ -41,7 +41,7 @@ pipeline {
         stage('Build & Tag Docker Image') {
             steps {
                 echo 'Building Docker Image with Tags...'
-                sh "sudo docker build -t ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest -t booking-ms:latest ."
+                sh "sudo docker build -t ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest -t pramodmanjare27/booking-ms:latest ."
                 echo 'Docker Image Build Completed!'
             }
         }
@@ -56,9 +56,11 @@ pipeline {
             steps {
                 script {
                     withCredentials([string(credentialsId: 'dockerhubCred', variable: 'dockerhubCred')]) {
-                        sh 'sudo docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}'
                         echo 'Pushing Docker Image to Docker Hub...'
-                       // sh 'docker push pramodmanjare27/booking-ms:latest'
+			sh '''
+                              sudo docker login docker.io -u pramodmanjare27 -p ${dockerhubCred}
+                              sudo docker push pramodmanjare27/booking-ms:latest
+			    '''
                         echo 'Docker Image Pushed to Docker Hub Successfully!'
                     }
                 }
@@ -67,11 +69,13 @@ pipeline {
         stage('Push Docker Image to Nexus') {
             steps {
                 script {
-                    withDockerRegistry([credentialsId: 'nexus-credentials', url: "localhost:18080"]) {
-                        echo 'Tagging and Pushing Docker Image to ECR...'
+                    withCredentials([string(credentialsId: 'nexus-credentials', variable: 'nexus-credentials')]) {
+                        echo 'Pushing Docker Image to nexus ...'
+			
                         sh '''
-                            sudo docker images
-                            sudo docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
+                            #sudo docker login ${NEXUS_HOST}:${NEXUS_PORT} -u admin -p ${nexus-credentials}
+			    sudo docker images
+                            #sudo docker push ${NEXUS_HOST}:${NEXUS_PORT}/booking-ms:latest
                         '''
                         echo 'Docker Image Pushed to nexus Successfully!'
                     }
