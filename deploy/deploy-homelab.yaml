@@ -3,5 +3,5 @@
   hosts: dev
   tasks:
     - name: Print Hello World message
-      ansible.builtin.debug:
-        msg: "Hello World!"
+      ansible.builtin.ping:
+        
