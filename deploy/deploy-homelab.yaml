@@ -1,7 +1,5 @@
----
-- name: Hello World Playbook
+- name: Deploying Microservices
   hosts: dev
   tasks:
-    - name: Print Hello World message
-      ansible.builtin.ping:
-        
+    - name: Deploying microservices on DEV
+      ansible.builtin.script: /tmp/semaphore/project_1/repository_1_template_2/deploy/deploy_microservice_app.sh "DEV"
