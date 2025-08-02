@@ -27,6 +27,14 @@ pipeline {
                 echo 'WAR Artifact Created Successfully!'
             }
         }
+
+        stage('Nexus Push') {
+            steps {
+                echo 'Pushing WAR Artifact to Nexus...'
+                sh 'mvn clean deploy'
+                echo 'WAR Artifact has been pushed to nexus Successfully!'
+            }
+        }
         stage('Build & Tag Docker Image') {
             steps {
                 echo 'Building Docker Image with Tags...'
