@@ -3,3 +3,12 @@
   tasks:
     - name: Deploying microservices on DEV
       ansible.builtin.script: /tmp/semaphore/project_1/repository_1_template_2/deploy/deploy_microservice_app.sh "DEV"
+      register: script_output
+            
+    - name: Print The Deployment logs - stdout
+      debug:
+        var: script_output.stdout
+        
+    - name: Print The Deployment logs - stderr
+      debug:
+        var: script_output.stderr
